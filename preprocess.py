@@ -149,7 +149,12 @@ if __name__ == '__main__':
 	load = []
 	if len(commands) > 0:
 		for d in commands:
-			load_data(d)
+			try:
+				load_data(d)
+			except Exception as e:
+				print(e)
+				print('The dataset file might be unavailable due to the lack of distribution rights. Check readme in the ./data/ folder.')
+				exit()
 	else:
 		print("Usage: python preprocess.py <datasets>")
 		print("where <datasets> is space separated list of ['synthtic', 'SMD']")
