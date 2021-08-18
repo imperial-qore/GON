@@ -8,6 +8,7 @@ from src.plotting import *
 from src.pot import *
 from src.utils import *
 from src.diagnosis import *
+from src.torchsummary import *
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 import torch.nn as nn
 from time import time
@@ -245,6 +246,33 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 			loss = l(outputs, data)
 			loss = loss[:, data.shape[1]-feats:data.shape[1]].view(-1, feats)
 			return loss.detach().numpy(), y_pred.detach().numpy()
+	elif 'SAN' in model.name:
+		l = nn.MSELoss(reduction = 'none')
+		bcel = nn.BCELoss(reduction = 'mean')
+		real_label, fake_label = torch.tensor([0.9]), torch.tensor([0.1]) # label smoothing
+		real_label, fake_label = real_label.type(torch.DoubleTensor), fake_label.type(torch.DoubleTensor)
+		n = epoch + 1; w_size = model.n_window
+		dls = []
+		if training:
+			for d in data:
+				# training discriminator
+				real_data, fake_data = d, gen(model, d, real_label, bcel)[0]
+				real, fake = model(real_data), model(fake_data)
+				loss = bcel(real, real_label) + bcel(fake, fake_label)
+				optimizer.zero_grad(); loss.backward(); optimizer.step()
+				dls.append(loss.item())
+			tqdm.write(f'Epoch {epoch},\tLoss = {np.mean(dls)}')
+			return np.mean(dls), optimizer.param_groups[0]['lr']
+		else:
+			outputs = []
+			for d in data: 
+				z = gen(model, d, real_label, bcel)[0]
+				outputs.append(z)
+			outputs = torch.stack(outputs)
+			y_pred = outputs[:, data.shape[1]-feats:data.shape[1]].view(-1, feats)
+			loss = l(outputs, data)
+			loss = loss[:, data.shape[1]-feats:data.shape[1]].view(-1, feats)
+			return loss.detach().numpy(), y_pred.detach().numpy()
 	elif 'TranAD' in model.name:
 		l = nn.MSELoss(reduction = 'none')
 		data_x = torch.DoubleTensor(data); dataset = TensorDataset(data_x, data_x)
@@ -292,6 +320,7 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 if __name__ == '__main__':
 	train_loader, test_loader, labels = load_dataset(args.dataset)
 	model, optimizer, scheduler, epoch, accuracy_list = load_model(args.model, labels.shape[1])
+	summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*10); #exit()
 
 	## Prepare data
 	trainD, testD = next(iter(train_loader)), next(iter(test_loader))

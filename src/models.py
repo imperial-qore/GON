@@ -9,6 +9,7 @@ from torch.nn import TransformerEncoder
 from torch.nn import TransformerDecoder
 from src.dlutils import *
 from src.constants import *
+from src.gen import *
 torch.manual_seed(1)
 
 ## Separate LSTM for each variable
@@ -323,7 +324,7 @@ class MAD_GAN(nn.Module):
 		fake_score = self.discriminator(z.view(1,-1))
 		return z.view(-1), real_score.view(-1), fake_score.view(-1)
 
-# Proposed Model + Self Conditioning + Adversarial + MAML (ICDM 21)
+# TranAD (ICDM 21)
 class TranAD(nn.Module):
 	def __init__(self, feats):
 		super(TranAD, self).__init__()
@@ -358,3 +359,23 @@ class TranAD(nn.Module):
 		c = (x1 - src) ** 2
 		x2 = self.fcn(self.transformer_decoder2(*self.encode(src, c, tgt)))
 		return x1, x2
+
+class SAN(nn.Module):
+	def __init__(self, feats):
+		super(SAN, self).__init__()
+		self.name = 'SAN'
+		self.lr = 0.0001
+		self.n_feats = feats
+		self.n_hidden = 16
+		self.n_window = 5 
+		self.n = self.n_feats * self.n_window
+		self.discriminator = nn.Sequential(
+			nn.Flatten(),
+			nn.Linear(self.n, self.n_hidden), nn.LeakyReLU(True),
+			nn.Linear(self.n_hidden, self.n_hidden), nn.LeakyReLU(True),
+			nn.Linear(self.n_hidden, 1), nn.Sigmoid(),
+		)
+
+	def forward(self, g):
+		score = self.discriminator(g.view(1,-1))
+		return score.view(-1)
