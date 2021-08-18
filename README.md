@@ -5,6 +5,9 @@
 # SAN
 Self Adversarial Network for Memory-Constrained Anomaly Detection. 
 
+Important references: 'self-supervised adversarial training', 'DGSAN'.
+Baselines: memory constrained GANs/VAEs, memory constrained fault detection models. 
+
 ## License
 
 BSD-3-Clause. 

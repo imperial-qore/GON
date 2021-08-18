@@ -296,7 +296,7 @@ if __name__ == '__main__':
 	## Prepare data
 	trainD, testD = next(iter(train_loader)), next(iter(test_loader))
 	trainO, testO = trainD, testD
-	if model.name in ['Attention', 'DAGMM', 'USAD', 'MSCRED', 'GDN', 'MTAD_GAT', 'MAD_GAN'] or 'TranAD' in model.name: 
+	if model.name not in ['LSTM_Univariate', 'LSTM_AD']: 
 		trainD, testD = convert_to_windows(trainD, model), convert_to_windows(testD, model)
 
 	### Training phase
