@@ -320,7 +320,7 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 if __name__ == '__main__':
 	train_loader, test_loader, labels = load_dataset(args.dataset)
 	model, optimizer, scheduler, epoch, accuracy_list = load_model(args.model, labels.shape[1])
-	summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*10); #exit()
+	# summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*10); exit()
 
 	## Prepare data
 	trainD, testD = next(iter(train_loader)), next(iter(test_loader))

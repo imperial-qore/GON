@@ -8,6 +8,13 @@ Self Adversarial Network for Memory-Constrained Anomaly Detection.
 Important references: 'self-supervised adversarial training', 'DGSAN'.
 Baselines: memory constrained GANs/VAEs, memory constrained fault detection models. 
 
+## Figures
+
+1. Memory Comparison:
+	- Stacked bar graphs (input size, backprop size, param size).
+2. Performance Sensitivity:
+	- Comparison of performance with increasing memory footprint (line-plots).
+
 ## License
 
 BSD-3-Clause. 
