@@ -373,7 +373,7 @@ class SAN(nn.Module):
 		self.discriminator = nn.Sequential(
 			nn.Flatten(),
 			nn.Linear(self.n, self.n_hidden), nn.LeakyReLU(True),
-			# nn.Linear(self.n_hidden, self.n_hidden), nn.LeakyReLU(True),
+			nn.Linear(self.n_hidden, self.n_hidden), nn.LeakyReLU(True),
 			nn.Linear(self.n_hidden, 1), nn.Sigmoid(),
 		)
 
