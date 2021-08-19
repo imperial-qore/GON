@@ -360,19 +360,20 @@ class TranAD(nn.Module):
 		x2 = self.fcn(self.transformer_decoder2(*self.encode(src, c, tgt)))
 		return x1, x2
 
+# Proposed Model 
 class SAN(nn.Module):
 	def __init__(self, feats):
 		super(SAN, self).__init__()
 		self.name = 'SAN'
-		self.lr = 0.0001
+		self.lr = lrSAN
 		self.n_feats = feats
 		self.n_hidden = 16
-		self.n_window = 5 
+		self.n_window = 15 
 		self.n = self.n_feats * self.n_window
 		self.discriminator = nn.Sequential(
 			nn.Flatten(),
 			nn.Linear(self.n, self.n_hidden), nn.LeakyReLU(True),
-			nn.Linear(self.n_hidden, self.n_hidden), nn.LeakyReLU(True),
+			# nn.Linear(self.n_hidden, self.n_hidden), nn.LeakyReLU(True),
 			nn.Linear(self.n_hidden, 1), nn.Sigmoid(),
 		)
 

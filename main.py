@@ -55,7 +55,7 @@ def load_model(modelname, dims):
 	import src.models
 	model_class = getattr(src.models, modelname)
 	model = model_class(dims).double()
-	optimizer = torch.optim.AdamW(model.parameters() , lr=model.lr, weight_decay=1e-5)
+	optimizer = torch.optim.Adam(model.parameters() , lr=model.lr, weight_decay=1e-5)
 	scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 5, 0.9)
 	fname = f'checkpoints/{args.model}_{args.dataset}/model.ckpt'
 	if os.path.exists(fname) and (not args.retrain or args.test):
@@ -256,19 +256,22 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 		if training:
 			for d in data:
 				# training discriminator
-				real_data, fake_data = d, gen(model, d, real_label, bcel)[0]
+				real_data, fake_data = d, gen(model, d, real_label, bcel, 1e-3)[0]
+				# print(real_data, fake_data)
 				real, fake = model(real_data), model(fake_data)
-				loss = bcel(real, real_label) + bcel(fake, fake_label)
+				# print(real.item(), real_label.item(), fake.item(), fake_label.item())
+				loss = (bcel(real, real_label) + bcel(fake, fake_label)) / 2
 				optimizer.zero_grad(); loss.backward(); optimizer.step()
 				dls.append(loss.item())
 			tqdm.write(f'Epoch {epoch},\tLoss = {np.mean(dls)}')
 			return np.mean(dls), optimizer.param_groups[0]['lr']
 		else:
 			outputs = []
-			for d in data: 
+			for d in tqdm(data): 
 				z = gen(model, d, real_label, bcel)[0]
 				outputs.append(z)
 			outputs = torch.stack(outputs)
+			# shift = torch.mean(data - outputs, dim=0); outputs = outputs + shift # make shift invariant
 			y_pred = outputs[:, data.shape[1]-feats:data.shape[1]].view(-1, feats)
 			loss = l(outputs, data)
 			loss = loss[:, data.shape[1]-feats:data.shape[1]].view(-1, feats)
