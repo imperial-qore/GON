@@ -205,8 +205,9 @@ class SPOT:
             print('Number of peaks : %s' % self.Nt)
             print('Grimshaw maximum log-likelihood estimation ... ', end='')
 
-        g, s, l = self._grimshaw()
-        self.extreme_quantile = self._quantile(g, s)
+        # g, s, l = self._grimshaw()
+        # self.extreme_quantile = self._quantile(g, s)
+        self.extreme_quantile = self.init_threshold
 
         if verbose:
             print('[done]')

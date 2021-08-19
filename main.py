@@ -34,7 +34,8 @@ def load_dataset(dataset):
 		if dataset == 'MSL': file = 'C-1_' + file
 		loader.append(np.load(os.path.join(folder, f'{file}.npy')))
 	# loader = [i[:, debug:debug+1] for i in loader]
-	if args.less: loader[0] = cut_array(0.2, loader[0])
+	if args.less and 'SWaT' in args.dataset: loader[0] = cut_array(0.2, loader[0])
+	elif args.less: loader = [cut_array(0.2, loader[i]) for i in range(3)]
 	train_loader = DataLoader(loader[0], batch_size=loader[0].shape[0])
 	test_loader = DataLoader(loader[1], batch_size=loader[1].shape[0])
 	labels = loader[2]
@@ -323,7 +324,7 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 if __name__ == '__main__':
 	train_loader, test_loader, labels = load_dataset(args.dataset)
 	model, optimizer, scheduler, epoch, accuracy_list = load_model(args.model, labels.shape[1])
-	# summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*10); exit()
+	# summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*64); exit()
 
 	## Prepare data
 	trainD, testD = next(iter(train_loader)), next(iter(test_loader))

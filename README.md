@@ -12,6 +12,8 @@ Baselines: memory constrained GANs/VAEs, memory constrained fault detection mode
 
 1. Memory Comparison:
 	- Stacked bar graphs (input size, backprop size, param size).
+2. Training and testing time:
+	- Double column graph with training time on left and test time on right.
 2. Performance Sensitivity:
 	- Comparison of performance with increasing memory footprint (line-plots).
 
