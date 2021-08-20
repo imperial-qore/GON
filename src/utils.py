@@ -3,6 +3,7 @@ import os
 from src.constants import *
 import pandas as pd 
 import numpy as np
+from sklearn.metrics import *
 
 class color:
     HEADER = '\033[95m'
@@ -40,3 +41,10 @@ def getresults2(df, result):
 		results2[a] = df2[a]
 	results2['f1*'] = 2 * results2['precision'] * results2['recall'] / (results2['precision'] + results2['recall'])
 	return results2
+
+def compare(pred, labels):
+	pred, labels = np.array(pred), np.array(labels)
+	return {'precision': precision_score(labels, pred), 
+			'recall': recall_score(labels, pred),
+			'f1': f1_score(labels, pred),
+			'roc_auc': roc_auc_score(labels, pred)}

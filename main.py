@@ -9,11 +9,15 @@ from src.pot import *
 from src.utils import *
 from src.diagnosis import *
 from src.torchsummary import *
+from sklearn.ensemble import IsolationForest
+from sklearn.neighbors import LocalOutlierFactor
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 import torch.nn as nn
 from time import time
 from pprint import pprint
 from beepy import beep
+
+rng = np.random.RandomState(42)
 
 def convert_to_windows(data, model):
 	windows = []; w_size = model.n_window
@@ -322,16 +326,35 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 		else:
 			return loss.detach().numpy(), y_pred.detach().numpy()
 
+def traditional(trainD, testD, labels):
+	start = time()
+	if args.model == 'IF':
+		clf = IsolationForest(random_state=rng, n_estimators=1000, max_features=1.0, bootstrap=False)
+	elif args.model == 'LOF':
+		clf = LocalOutlierFactor(novelty=True)
+	c = clf.fit(trainD.tolist())
+	print(color.BOLD+'Training time: '+"{:10.4f}".format(time()-start)+' s'+color.ENDC)
+	pred = c.predict(testD.tolist()); pred = (-pred + 1) / 2
+	
+	labelsFinal = (np.sum(labels, axis=1) >= 1) + 0
+	result = compare(labelsFinal, pred)
+	result.update(hit_att(pred, labelsFinal)); result.update(ndcg(pred, labelsFinal))
+	pprint(result)
+	return
+
 if __name__ == '__main__':
 	train_loader, test_loader, labels = load_dataset(args.dataset)
-	model, optimizer, scheduler, epoch, accuracy_list = load_model(args.model, labels.shape[1])
-	# summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*64); exit()
 
 	## Prepare data
 	trainD, testD = next(iter(train_loader)), next(iter(test_loader))
 	trainO, testO = trainD, testD
-	if model.name not in ['LSTM_Univariate', 'LSTM_AD']: 
+
+	# Prepare Model
+	if args.model in ['IF', 'LOF']: traditional(trainD, testD, labels); exit()
+	model, optimizer, scheduler, epoch, accuracy_list = load_model(args.model, labels.shape[1])
+	if args.model not in ['LSTM_Univariate', 'LSTM_AD']: 
 		trainD, testD = convert_to_windows(trainD, model), convert_to_windows(testD, model)
+	# summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*64); exit()
 
 	### Training phase
 	if not args.test:
