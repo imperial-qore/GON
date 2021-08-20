@@ -331,3 +331,21 @@ class Cholesky(torch.autograd.Function):
             1.0 - Variable(l.data.new(l.size(1)).fill_(0.5).diag()))
         s = torch.mm(linv.t(), torch.mm(inner, linv))
         return s
+
+# The following class is adapted from 'https://github.com/JiahuiYu/slimmable_networks'
+class SlimmableLinear(nn.Linear):
+    def __init__(self, in_feature, out_feature, slim_multiplier, bias=True):
+        super(SlimmableLinear, self).__init__(in_feature, out_feature, bias=bias)
+        self.in_feature = in_feature
+        self.out_feature = out_feature
+        self.slim_multiplier = slim_multiplier
+
+    def forward(self, inp):
+        w_1 = self.out_feature * self.slim_multiplier 
+        w_2 = self.in_feature * self.slim_multiplier
+        weight = self.weight[:w_1, :w_2]
+        if self.bias is not None:
+            bias = self.bias[:w_1]
+        else:
+            bias = self.bias
+        return F.linear(inp, weight, bias)

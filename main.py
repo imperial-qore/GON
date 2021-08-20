@@ -8,9 +8,11 @@ from src.plotting import *
 from src.pot import *
 from src.utils import *
 from src.diagnosis import *
+from src.pseudoinverse import *
 from src.torchsummary import *
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
+from sklearn.svm import OneClassSVM
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 import torch.nn as nn
 from time import time
@@ -313,6 +315,24 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 				if isinstance(z, tuple): z = z[1]
 			loss = l(z, elem)[0]
 			return loss.detach().numpy(), z.detach().numpy()[0]
+	elif 'ONLAD' in model.name:
+		optimizer = pseudoInverse(params=model.parameters(),C=0.001,L=0)
+		if training:
+			for d in data:
+				hiddenOut = model.forwardToHidden(d)
+				optimizer.train(inputs=hiddenOut, targets=d, oneHotVectorize=False)
+			tqdm.write(f'Epoch {epoch}')
+			return 0, 0
+		else:
+			outputs = []
+			for d in data: 
+				z = model(d)
+				outputs.append(z)
+			outputs = torch.stack(outputs)
+			y_pred = outputs[:, data.shape[1]-feats:data.shape[1]].view(-1, feats)
+			loss = l(outputs, data)
+			loss = loss[:, data.shape[1]-feats:data.shape[1]].view(-1, feats)
+			return loss.detach().numpy(), y_pred.detach().numpy()
 	else:
 		y_pred = model(data)
 		loss = l(y_pred, data)
@@ -330,8 +350,10 @@ def traditional(trainD, testD, labels):
 	start = time()
 	if args.model == 'IF':
 		clf = IsolationForest(random_state=rng, n_estimators=1000, max_features=1.0, bootstrap=False)
-	elif args.model == 'LOF':
-		clf = LocalOutlierFactor(novelty=True)
+	elif args.model == 'DILOF':
+		clf = LocalOutlierFactor(algorithm='auto', leaf_size=1, novelty=True)
+	elif args.model == 'SVM':
+		clf = OneClassSVM(gamma='auto')
 	c = clf.fit(trainD.tolist())
 	print(color.BOLD+'Training time: '+"{:10.4f}".format(time()-start)+' s'+color.ENDC)
 	pred = c.predict(testD.tolist()); pred = (-pred + 1) / 2
@@ -343,6 +365,7 @@ def traditional(trainD, testD, labels):
 	return
 
 if __name__ == '__main__':
+	# Allowed models: SAN, USAD, MAD_GAN, SlimGAN, DILOF, IF, TranAD, ONLAD, SVM
 	train_loader, test_loader, labels = load_dataset(args.dataset)
 
 	## Prepare data
@@ -350,7 +373,7 @@ if __name__ == '__main__':
 	trainO, testO = trainD, testD
 
 	# Prepare Model
-	if args.model in ['IF', 'LOF']: traditional(trainD, testD, labels); exit()
+	if args.model in ['IF', 'DILOF', 'SVM']: traditional(trainD, testD, labels); exit()
 	model, optimizer, scheduler, epoch, accuracy_list = load_model(args.model, labels.shape[1])
 	if args.model not in ['LSTM_Univariate', 'LSTM_AD']: 
 		trainD, testD = convert_to_windows(trainD, model), convert_to_windows(testD, model)

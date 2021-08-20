@@ -324,6 +324,37 @@ class MAD_GAN(nn.Module):
 		fake_score = self.discriminator(z.view(1,-1))
 		return z.view(-1), real_score.view(-1), fake_score.view(-1)
 
+# SlimGAN (AAAI 21)
+class SlimGAN(nn.Module):
+	def __init__(self, feats):
+		super(SlimGAN, self).__init__()
+		self.name = 'SlimGAN'
+		self.lr = 0.0001
+		self.n_feats = feats
+		self.n_hidden = 16
+		self.n_window = 5 # SlimGAN w_size = 5
+		self.n = self.n_feats * self.n_window
+		self.generator = nn.Sequential(
+			nn.Flatten(),
+			SlimmableLinear(self.n, self.n_hidden, 1), nn.LeakyReLU(True),
+			SlimmableLinear(self.n_hidden, self.n_hidden, 1), nn.LeakyReLU(True),
+			SlimmableLinear(self.n_hidden, self.n, 1), nn.Sigmoid(),
+		)
+		self.discriminator = nn.Sequential(
+			nn.Flatten(),
+			SlimmableLinear(self.n, self.n_hidden, 1), nn.LeakyReLU(True),
+			SlimmableLinear(self.n_hidden, self.n_hidden, 1), nn.LeakyReLU(True),
+			SlimmableLinear(self.n_hidden, 1, 1), nn.Sigmoid(),
+		)
+
+	def forward(self, g):
+		## Generate
+		z = self.generator(g.view(1,-1))
+		## Discriminator
+		real_score = self.discriminator(g.view(1,-1))
+		fake_score = self.discriminator(z.view(1,-1))
+		return z.view(-1), real_score.view(-1), fake_score.view(-1)
+
 # TranAD (ICDM 21)
 class TranAD(nn.Module):
 	def __init__(self, feats):
@@ -359,6 +390,37 @@ class TranAD(nn.Module):
 		c = (x1 - src) ** 2
 		x2 = self.fcn(self.transformer_decoder2(*self.encode(src, c, tgt)))
 		return x1, x2
+
+# ONLAD (TOC 20)
+class ONLAD(nn.Module):
+	def __init__(self, feats):
+		super(ONLAD, self).__init__()
+		self.name = 'ONLAD'
+		self.lr = 0.0001
+		self.n_feats = feats
+		self.n_hidden = 16
+		self.n_latent = 5
+		self.n_window = 5 # ONLAD w_size = 5
+		self.n = self.n_feats * self.n_window
+		self.fc1 = nn.Linear(self.n, self.n_hidden)
+		self.activation = nn.LeakyReLU(True)
+		torch.nn.init.xavier_uniform(self.fc1.weight,gain=nn.init.calculate_gain('leaky_relu'))
+		self.fc2 = nn.Linear(self.n_hidden, self.n, bias=False) # ELM do not use bias in the output layer.
+		self.sigmoid = nn.Sigmoid()
+
+	def forward(self, x):
+		x = x.view(1,-1)
+		x = self.fc1(x)
+		x = self.activation(x)
+		x = self.fc2(x)
+		x = self.sigmoid(x)
+		return x.view(-1)
+
+	def forwardToHidden(self, x):
+		x = x.view(1,-1)
+		x = self.fc1(x)
+		x = self.activation(x)
+		return x
 
 # Proposed Model 
 class SAN(nn.Module):
