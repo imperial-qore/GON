@@ -40,6 +40,11 @@ To generate accuracy scores for model `<M>` on dataset `<D>`:
 python3 main.py --model <M> --dataset <D> --test
 ```
 
+To generate the memory consumpion profile of a model:
+```bash
+python3 main.py --model <M> --dataset <D> --memory
+```
+
 ## License
 
 BSD-3-Clause. 

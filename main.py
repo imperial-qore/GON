@@ -387,13 +387,14 @@ if __name__ == '__main__':
 
 	### Testing phase
 	torch.zero_grad = True
-	model.eval()
+	model.eval(); start = time()
+	if args.notest: exit()
 	print(f'{color.HEADER}Testing {args.model} on {args.dataset}{color.ENDC}')
 	loss, y_pred = backprop(0, model, testD, testO, optimizer, scheduler, training=False)
+	print(color.BOLD+'Testing time: '+"{:10.4f}".format(time()-start)+' s'+color.ENDC)
 
 	### Plot curves
-	if not args.test:
-		plotter(f'{args.model}_{args.dataset}', testO, y_pred, loss, labels)
+	plotter(f'{args.model}_{args.dataset}', testO, y_pred, loss, labels)
 
 	### Scores
 	df = pd.DataFrame()

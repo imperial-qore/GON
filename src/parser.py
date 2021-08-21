@@ -25,4 +25,7 @@ parser.add_argument('--less',
 parser.add_argument('--memory', 
 					action='store_true', 
 					help="print memory consumption")
+parser.add_argument('--notest', 
+					action='store_true', 
+					help="only train the model")
 args = parser.parse_args()
