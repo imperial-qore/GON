@@ -35,14 +35,7 @@ def load_dataset(dataset):
 		raise Exception('Processed Data not found.')
 	loader = []
 	for file in ['train', 'test', 'labels']:
-		if dataset == 'SMD': file = 'machine-1-1_' + file
-		if dataset == 'SMAP': file = 'P-1_' + file
-		if dataset == 'MSL': file = 'C-1_' + file
 		loader.append(np.load(os.path.join(folder, f'{file}.npy')))
-	# loader = [i[:, debug:debug+1] for i in loader]
-	if args.less and 'SWaT' in args.dataset: loader[0] = cut_array(0.2, loader[0])
-	elif args.less and 'SMD' in args.dataset: loader = [cut_array(0.2, loader[i]) for i in range(3)]
-	elif args.less and 'SMAP' in args.dataset: loader = [cut_array(0.2, loader[i]) for i in range(3)]
 	train_loader = DataLoader(loader[0], batch_size=loader[0].shape[0])
 	test_loader = DataLoader(loader[1], batch_size=loader[1].shape[0])
 	labels = loader[2]
@@ -366,6 +359,7 @@ def traditional(trainD, testD, labels):
 
 if __name__ == '__main__':
 	# Allowed models: SAN, USAD, MAD_GAN, SlimGAN, DILOF, IF, TranAD, ONLAD, SVM
+	# Allowed datasets: SMD, MSDS, FTSAD(1/25/55)
 	train_loader, test_loader, labels = load_dataset(args.dataset)
 
 	## Prepare data
@@ -377,7 +371,8 @@ if __name__ == '__main__':
 	model, optimizer, scheduler, epoch, accuracy_list = load_model(args.model, labels.shape[1])
 	if args.model not in ['LSTM_Univariate', 'LSTM_AD']: 
 		trainD, testD = convert_to_windows(trainD, model), convert_to_windows(testD, model)
-	# summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*64); exit()
+	if args.memory:
+		summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*64); exit()
 
 	### Training phase
 	if not args.test:

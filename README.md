@@ -17,6 +17,29 @@ Baselines: memory constrained GANs/VAEs, memory constrained fault detection mode
 2. Performance Sensitivity:
 	- Comparison of performance with increasing memory footprint (line-plots).
 
+## Result Reproduction
+
+Install dependencies:
+```bash
+python3 -m pip install -r requirements.txt
+```
+
+Run model `<M>` on dataset `<D>`:
+```bash
+python3 main.py --model <M> --dataset <D> --retrain
+```
+This will train the model and give results. `<M>` can be one of SAN, USAD, MAD_GAN, SlimGAN, DILOF, IF, TranAD, ONLAD, SVM. `<D>` can be one of SMD, MSDS, FTSAD(1), FTSAD(25), FTSAD(55). All preprocessed datasets are in the `processed` folder.
+
+To train all models at once:
+```bash
+./train.sh
+```
+
+To generate accuracy scores for model `<M>` on dataset `<D>`:
+```bash
+python3 main.py --model <M> --dataset <D> --test
+```
+
 ## License
 
 BSD-3-Clause. 

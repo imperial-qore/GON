@@ -22,4 +22,7 @@ parser.add_argument('--retrain',
 parser.add_argument('--less', 
 					action='store_true', 
 					help="train using less data")
+parser.add_argument('--memory', 
+					action='store_true', 
+					help="print memory consumption")
 args = parser.parse_args()
