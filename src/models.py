@@ -300,7 +300,7 @@ class MAD_GAN(nn.Module):
 		self.name = 'MAD_GAN'
 		self.lr = 0.0001
 		self.n_feats = feats
-		self.n_hidden = 16
+		self.n_hidden = 64 if feats > 50 else 32 if feats > 20 else 16
 		self.n_window = 5 # MAD_GAN w_size = 5
 		self.n = self.n_feats * self.n_window
 		self.generator = nn.Sequential(
@@ -331,8 +331,8 @@ class SlimGAN(nn.Module):
 		self.name = 'SlimGAN'
 		self.lr = 0.0001
 		self.n_feats = feats
-		self.n_hidden = 16
-		self.n_window = 5 # SlimGAN w_size = 5
+		self.n_hidden = 64 if feats > 50 else 32 if feats > 20 else 16
+		self.n_window = 3 # SlimGAN w_size = 5
 		self.n = self.n_feats * self.n_window
 		self.generator = nn.Sequential(
 			nn.Flatten(),
@@ -398,7 +398,7 @@ class ONLAD(nn.Module):
 		self.name = 'ONLAD'
 		self.lr = 0.0001
 		self.n_feats = feats
-		self.n_hidden = 16
+		self.n_hidden = 1024 if feats > 50 else 512 if feats > 20 else 64
 		self.n_latent = 5
 		self.n_window = 5 # ONLAD w_size = 5
 		self.n = self.n_feats * self.n_window

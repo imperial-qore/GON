@@ -56,6 +56,7 @@ def summary_string(model, input_size, batch_size=-1, device=torch.device('cuda:0
     if isinstance(input_size, tuple):
         input_size = [input_size]
 
+    print(input_size)
     # batch_size of 2 for batchnorm
     x = [torch.rand(1, *in_size).type(dtype)
          for in_size, dtype in zip(input_size, dtypes)]
@@ -68,7 +69,7 @@ def summary_string(model, input_size, batch_size=-1, device=torch.device('cuda:0
     model.apply(register_hook)
 
     # make a forward pass
-    # print(x.shape)
+    # print(x[0].shape, x[1].shape)
     model(*x)
 
     # remove these hooks

@@ -257,7 +257,7 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 		if training:
 			for d in data:
 				# training discriminator
-				real_data, fake_data = d, gen(model, d, real_label, bcel, 1e-3)[0]
+				real_data, fake_data = d, gen(model, d, real_label, bcel, 1e-3)
 				# print(real_data, fake_data)
 				real, fake = model(real_data), model(fake_data)
 				# print(real.item(), real_label.item(), fake.item(), fake_label.item())
@@ -269,7 +269,7 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 		else:
 			outputs = []
 			for d in tqdm(data): 
-				z = gen(model, d, real_label, bcel)[0]
+				z = gen(model, d, real_label, bcel)
 				outputs.append(z)
 			outputs = torch.stack(outputs)
 			# shift = torch.mean(data - outputs, dim=0); outputs = outputs + shift # make shift invariant
@@ -289,6 +289,8 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 				local_bs = d.shape[0]
 				window = d.permute(1, 0, 2)
 				elem = window[-1, :, :].view(1, local_bs, feats)
+				if args.memory:
+					summary(model, input_size=[tuple(window.shape[1:]), tuple(elem.shape[1:])], batch_size=labels.shape[0]); exit()
 				z = model(window, elem)
 				l1 = l(z, elem) if not isinstance(z, tuple) else (1 / n) * l(z[0], elem) + (1 - 1/n) * l(z[1], elem)
 				if isinstance(z, tuple): z = z[1]
@@ -350,16 +352,18 @@ def traditional(trainD, testD, labels):
 	c = clf.fit(trainD.tolist())
 	print(color.BOLD+'Training time: '+"{:10.4f}".format(time()-start)+' s'+color.ENDC)
 	pred = c.predict(testD.tolist()); pred = (-pred + 1) / 2
-	
+
+	if args.memory:
+		size = abs(labels.shape[1] * 35 * 8 * labels.shape[0]*64 * 4) / (1024 ** 2.)
+		print(f'Input Size (MB): {size}')
 	labelsFinal = (np.sum(labels, axis=1) >= 1) + 0
 	result = compare(labelsFinal, pred)
-	result.update(hit_att(pred, labelsFinal)); result.update(ndcg(pred, labelsFinal))
 	pprint(result)
 	return
 
 if __name__ == '__main__':
 	# Allowed models: SAN, USAD, MAD_GAN, SlimGAN, DILOF, IF, TranAD, ONLAD, SVM
-	# Allowed datasets: SMD, MSDS, FTSAD(1/25/55)
+	# Allowed datasets: SMD, MSDS, FTSAD-1/25/55
 	train_loader, test_loader, labels = load_dataset(args.dataset)
 
 	## Prepare data
@@ -372,7 +376,8 @@ if __name__ == '__main__':
 	if args.model not in ['LSTM_Univariate', 'LSTM_AD']: 
 		trainD, testD = convert_to_windows(trainD, model), convert_to_windows(testD, model)
 	if args.memory:
-		summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*64); exit()
+		if 'TranAD' not in args.model:
+			summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*64); exit()
 
 	### Training phase
 	if not args.test:
@@ -408,8 +413,8 @@ if __name__ == '__main__':
 	lossTfinal, lossFinal = np.mean(lossT, axis=1), np.mean(loss, axis=1)
 	labelsFinal = (np.sum(labels, axis=1) >= 1) + 0
 	result, _ = pot_eval(lossTfinal, lossFinal, labelsFinal)
-	result.update(hit_att(loss, labels))
-	result.update(ndcg(loss, labels))
+	# result.update(hit_att(loss, labels))
+	# result.update(ndcg(loss, labels))
 	print(df)
 	pprint(result)
 	# pprint(getresults2(df, result))
