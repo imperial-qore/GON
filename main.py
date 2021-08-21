@@ -383,6 +383,7 @@ if __name__ == '__main__':
 	if not args.test:
 		print(f'{color.HEADER}Training {args.model} on {args.dataset}{color.ENDC}')
 		num_epochs = 5; e = epoch + 1; start = time()
+		if args.dataset in ['SMD', 'MSDS'] and args.model == 'SAN': num_epochs = 1
 		for e in tqdm(list(range(epoch+1, epoch+num_epochs+1))):
 			lossT, lr = backprop(e, model, trainD, trainO, optimizer, scheduler)
 			accuracy_list.append((lossT, lr))
@@ -413,8 +414,6 @@ if __name__ == '__main__':
 	lossTfinal, lossFinal = np.mean(lossT, axis=1), np.mean(loss, axis=1)
 	labelsFinal = (np.sum(labels, axis=1) >= 1) + 0
 	result, _ = pot_eval(lossTfinal, lossFinal, labelsFinal)
-	# result.update(hit_att(loss, labels))
-	# result.update(ndcg(loss, labels))
 	print(df)
 	pprint(result)
 	# pprint(getresults2(df, result))
