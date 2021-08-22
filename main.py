@@ -18,6 +18,7 @@ import torch.nn as nn
 from time import time
 from pprint import pprint
 from beepy import beep
+import sys
 
 rng = np.random.RandomState(42)
 
@@ -356,6 +357,7 @@ def traditional(trainD, testD, labels):
 	if args.memory:
 		size = abs(labels.shape[1] * 35 * 8 * labels.shape[0]*64 * 4) / (1024 ** 2.)
 		print(f'Input Size (MB): {size}')
+		print(f'Memory Size (MB): '+str(sys.getsizeof(c) / 1024 / 1024))
 	labelsFinal = (np.sum(labels, axis=1) >= 1) + 0
 	result = compare(labelsFinal, pred)
 	pprint(result)
