@@ -32,7 +32,7 @@ Run model `<M>` on dataset `<D>`:
 ```bash
 python3 main.py --model <M> --dataset <D> --retrain
 ```
-This will train the model and give results. `<M>` can be one of SAN, USAD, MAD_GAN, SlimGAN, DILOF, IF, TranAD, ONLAD, SVM. `<D>` can be one of SMD, MSDS, FTSAD-1, FTSAD-25, FTSAD-55. All preprocessed datasets are in the `processed` folder.
+This will train the model and give results. `<M>` can be one of GON, USAD, MAD_GAN, SlimGAN, DILOF, IF, TranAD, ONLAD, SVM. `<D>` can be one of SMD, MSDS, FTSAD-1, FTSAD-25, FTSAD-55. All preprocessed datasets are in the `processed` folder.
 
 To train all models at once:
 ```bash

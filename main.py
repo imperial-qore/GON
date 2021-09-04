@@ -179,7 +179,7 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 			loss = 0.1 * l(ae1s, data) + 0.9 * l(ae2ae1s, data)
 			loss = loss[:, data.shape[1]-feats:data.shape[1]].view(-1, feats)
 			return loss.detach().numpy(), y_pred.detach().numpy()
-	elif model.name in ['GDN', 'MTAD_GAT', 'MSCRED']:
+	elif model.name in ['GDN', 'MTAD_GAT', 'MSCRED', 'CAE_M']:
 		l = nn.MSELoss(reduction = 'none')
 		n = epoch + 1; w_size = model.n_window
 		l1s = []
@@ -248,7 +248,7 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 			loss = l(outputs, data)
 			loss = loss[:, data.shape[1]-feats:data.shape[1]].view(-1, feats)
 			return loss.detach().numpy(), y_pred.detach().numpy()
-	elif 'SAN' in model.name:
+	elif 'GON' in model.name:
 		l = nn.MSELoss(reduction = 'none')
 		bcel = nn.BCELoss(reduction = 'mean')
 		real_label, fake_label = torch.tensor([0.9]), torch.tensor([0.1]) # label smoothing
@@ -278,39 +278,6 @@ def backprop(epoch, model, data, dataO, optimizer, scheduler, training = True):
 			loss = l(outputs, data)
 			loss = loss[:, data.shape[1]-feats:data.shape[1]].view(-1, feats)
 			return loss.detach().numpy(), y_pred.detach().numpy()
-	elif 'TranAD' in model.name:
-		l = nn.MSELoss(reduction = 'none')
-		data_x = torch.DoubleTensor(data); dataset = TensorDataset(data_x, data_x)
-		bs = model.batch if training else len(data)
-		dataloader = DataLoader(dataset, batch_size = bs)
-		n = epoch + 1; w_size = model.n_window
-		l1s, l2s = [], []
-		if training:
-			for d, _ in dataloader:
-				local_bs = d.shape[0]
-				window = d.permute(1, 0, 2)
-				elem = window[-1, :, :].view(1, local_bs, feats)
-				if args.memory:
-					summary(model, input_size=[tuple(window.shape[1:]), tuple(elem.shape[1:])], batch_size=labels.shape[0]); exit()
-				z = model(window, elem)
-				l1 = l(z, elem) if not isinstance(z, tuple) else (1 / n) * l(z[0], elem) + (1 - 1/n) * l(z[1], elem)
-				if isinstance(z, tuple): z = z[1]
-				l1s.append(torch.mean(l1).item())
-				loss = torch.mean(l1)
-				optimizer.zero_grad()
-				loss.backward(retain_graph=True)
-				optimizer.step()
-			scheduler.step()
-			tqdm.write(f'Epoch {epoch},\tL1 = {np.mean(l1s)}')
-			return np.mean(l1s), optimizer.param_groups[0]['lr']
-		else:
-			for d, _ in dataloader:
-				window = d.permute(1, 0, 2)
-				elem = window[-1, :, :].view(1, bs, feats)
-				z = model(window, elem)
-				if isinstance(z, tuple): z = z[1]
-			loss = l(z, elem)[0]
-			return loss.detach().numpy(), z.detach().numpy()[0]
 	elif 'ONLAD' in model.name:
 		optimizer = pseudoInverse(params=model.parameters(),C=0.001,L=0)
 		if training:
@@ -364,7 +331,7 @@ def traditional(trainD, testD, labels):
 	return
 
 if __name__ == '__main__':
-	# Allowed models: SAN, USAD, MAD_GAN, SlimGAN, DILOF, IF, TranAD, ONLAD, SVM
+	# Allowed models: GON, USAD, MAD_GAN, SlimGAN, DILOF, IF, CAE_M, ONLAD, SVM
 	# Allowed datasets: SMD, MSDS, FTSAD-1/25/55
 	train_loader, test_loader, labels = load_dataset(args.dataset)
 
@@ -378,14 +345,13 @@ if __name__ == '__main__':
 	if args.model not in ['LSTM_Univariate', 'LSTM_AD']: 
 		trainD, testD = convert_to_windows(trainD, model), convert_to_windows(testD, model)
 	if args.memory:
-		if 'TranAD' not in args.model:
-			summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*64); exit()
+		summary(model, input_size=(labels.shape[1], model.n_window), batch_size=labels.shape[0]*64); exit()
 
 	### Training phase
 	if not args.test:
 		print(f'{color.HEADER}Training {args.model} on {args.dataset}{color.ENDC}')
 		num_epochs = 5; e = epoch + 1; start = time()
-		if args.dataset in ['SMD', 'MSDS'] and args.model == 'SAN': num_epochs = 1
+		if args.dataset in ['SMD', 'MSDS'] and args.model == 'GON': num_epochs = 1
 		for e in tqdm(list(range(epoch+1, epoch+num_epochs+1))):
 			lossT, lr = backprop(e, model, trainD, trainO, optimizer, scheduler)
 			accuracy_list.append((lossT, lr))

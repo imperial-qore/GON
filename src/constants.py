@@ -11,7 +11,7 @@ lm_d = {
 		'WADI': [(0.99, 1), (0.999, 1), (0.999, 1)],
 		'MSDS': [(0.91, 1), (0.9996, 1.04), (0.9, 1.04)],
 	}
-lm = lm_d[args.dataset][1 if 'TranAD' in args.model else 2 if 'SAN' in args.model else 0]
+lm = lm_d[args.dataset][2 if 'GON' in args.model else 0]
 
 # Hyperparameters
 lr_d = {
