@@ -364,14 +364,14 @@ class CAE_M(nn.Module):
 		self.n_feats = feats
 		self.n_window = feats
 		self.encoder = nn.Sequential(
-			nn.Conv2d(1, 8, (3, 3), 1, 1), nn.Sigmoid(),
-			nn.Conv2d(8, 16, (3, 3), 1, 1), nn.Sigmoid(),
+			nn.Conv2d(1, 16, (3, 3), 1, 1), nn.Sigmoid(),
 			nn.Conv2d(16, 32, (3, 3), 1, 1), nn.Sigmoid(),
+			nn.Conv2d(32, 64, (3, 3), 1, 1), nn.Sigmoid(),
 		)
 		self.decoder = nn.Sequential(
-			nn.ConvTranspose2d(32, 4, (3, 3), 1, 1), nn.Sigmoid(),
-			nn.ConvTranspose2d(4, 4, (3, 3), 1, 1), nn.Sigmoid(),
-			nn.ConvTranspose2d(4, 1, (3, 3), 1, 1), nn.Sigmoid(),
+			nn.ConvTranspose2d(64, 32, (3, 3), 1, 1), nn.Sigmoid(),
+			nn.ConvTranspose2d(32, 16, (3, 3), 1, 1), nn.Sigmoid(),
+			nn.ConvTranspose2d(16, 1, (3, 3), 1, 1), nn.Sigmoid(),
 		)
 
 	def forward(self, g):
