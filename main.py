@@ -17,7 +17,6 @@ from torch.utils.data import Dataset, DataLoader, TensorDataset
 import torch.nn as nn
 from time import time
 from pprint import pprint
-from beepy import beep
 import sys
 
 rng = np.random.RandomState(42)

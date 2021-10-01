@@ -4,3 +4,5 @@ matplotlib
 dgl
 numpy
 torchsummary
+SciencePlots
+scikit-learn
