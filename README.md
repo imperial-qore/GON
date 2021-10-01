@@ -16,7 +16,7 @@
   </a>
 </div>
 
-# GON for Memory-Efficient Data Generation
+## GON for Memory-Efficient Data Generation
 
 Hypothesis: "A discriminator is all you need". A sufficiently trained discriminator could not only indicate whether an input belongs to a data distribution but also how to tweak the input to make it resemble more closely to the target distribution. Thus, we can use only a discriminator for data generation and use those as fake samples in a self-adversarial training fashion. This allows us to reduce the parameter size significantly compared to traditional GANs.
 
