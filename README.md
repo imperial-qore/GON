@@ -52,9 +52,7 @@ python3 main.py --model <M> --dataset <D> --memory
 ```
 
 ## Gitpod
-You can directly run tests on the results using a Gitpod Workspace without needing to install anything on your local machine. Click "Open in Gitpod" below and test the code by running `python3 main.py --model <M> --dataset <D> --retrain`.
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/imperial-qore/GON/)
+You can directly run tests on the results using a Gitpod Workspace without needing to install anything on your local machine. Click "Open in Gitpod" on top of the page and test the code by running `python3 main.py --model GON --dataset FTSAD-1 --retrain`.
 
 ## License
 
