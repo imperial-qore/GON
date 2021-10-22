@@ -54,6 +54,21 @@ python3 main.py --model <M> --dataset <D> --memory
 ## Gitpod
 You can directly run tests and generate results using a Gitpod Workspace without needing to install anything on your local machine. Click "Open in Gitpod" on top of the page and test the code by running `python3 main.py --model GON --dataset FTSAD-1 --retrain`.
 
+## Arxiv preprint
+https://arxiv.org/abs/2110.02912.
+
+## Cite this work
+Our work is published in NeurIPS 2021, Workshop on ML for Systems.
+```bibtex
+@article{tuli2021generative,
+  title={Generative Optimization Networks for Memory Efficient Data Generation},
+  author={Tuli, Shreshth and Tuli, Shikhar and Casale, Giuliano and Jennings, Nicholas R},
+  journal={Advances in Neural Information Processing Systems, Workshop on ML for Systems},
+  year={2021}
+}
+
+```
+
 ## License
 
 BSD-3-Clause. 
