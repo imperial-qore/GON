@@ -3,7 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 plots/
-data/
+data/MSDS
+data/S*
+data/W*
+data/s*
 preprocess.py
 checkpoints/
 data/MSDS/metrics
