@@ -18,7 +18,7 @@
 
 ## GON for Memory-Efficient Data Generation
 
-Hypothesis: "A discriminator is all you need". A sufficiently trained discriminator could not only indicate whether an input belongs to a data distribution but also how to tweak the input to make it resemble more closely to the target distribution. Thus, we can use only a discriminator for data generation and use those as fake samples in a self-adversarial training fashion. This allows us to reduce the parameter size significantly compared to traditional GANs.
+Hypothesis: "A discriminator is all you need". A sufficiently trained discriminator could not only indicate whether an input belongs to a data distribution but also how to tweak the input to make it resemble more closely to the target distribution. Thus, we can use only a discriminator for data generation and use those as fake samples in a self-adversarial training fashion. This allows us to reduce the parameter size significantly compared to traditional GANs. GON stands for Generative Optimization Network and is an ML framework that is similar to GANs but does not use a generator. GONs use a single discriminator network that also generated new data samples by maximizing discriminator output by modigying the input (i.e. neural network inversion). Without the generator, GONs enable significant gains in terms of memory footprints and allow us to deploy generative models in resource constrined Edge devices.
 
 In this repo, we use a GON to train a reconstruction based time-series anomaly detector. Experiments on a Raspberry-Pi testbed with two existing and a new suite of datasets show that our framework gives up to 32% higher detection F1 scores and 58% lower memory consumption, with only 5% higher training overheads compared to the state-of-the-art.
 
@@ -58,11 +58,17 @@ You can directly run tests and generate results using a Gitpod Workspace without
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/NN79i7hB3-s/0.jpg)](https://www.youtube.com/watch?v=NN79i7hB3-s)
 
-## Arxiv preprint
-https://arxiv.org/abs/2110.02912.
+## External Links
+| Items | Contents | 
+| --- | --- |
+| **Pre-print** | https://arxiv.org/pdf/2110.02912.pdf |
+| **Supplementary** | https://github.com/imperial-qore/GON_MNIST |
+| **Video** | https://youtu.be/NN79i7hB3-s |
+| **Contact**| Shreshth Tuli ([@shreshthtuli](https://github.com/shreshthtuli))  |
+| **Funding**| Imperial President's scholarship |
 
 ## Cite this work
-Our work is published in NeurIPS 2021, Workshop on ML for Systems.
+Our work is published in NeurIPS 2021, Workshop on ML for Systems. Cite our work using the bibtex entry below.
 ```bibtex
 @article{tuli2021generative,
   title={Generative Optimization Networks for Memory Efficient Data Generation},
